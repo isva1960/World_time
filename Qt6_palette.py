@@ -4,7 +4,7 @@ from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtGui import QPalette
 
 APP_STYLE = "Fusion"
-
+# Словарь тем
 dict_colors = {"Темная": {
     "Window": {"Active": "#2b2b2b", "Inactive": "#2b2b2b", "Disabled": "#1e1e1e"},
     "WindowText": {"Active": "white", "Inactive": "#cccccc", "Disabled": "#666666"},
@@ -489,7 +489,6 @@ dict_colors = {"Темная": {
         "Midlight": {"Active": "#003300", "Inactive": "#003300", "Disabled": "#002200"}
     }
 }
-
 
 class PaletteManager:
     def __init__(self, main_window, p_app, p_dict_colors, palette_combo):
