@@ -1,0 +1,1 @@
+C:/Users/Professional/OneDrive/Документы/python/MyLib/Qt6_palette.py

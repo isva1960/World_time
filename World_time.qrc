@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>kworldclock.png</file>
+        <file>city_building.png</file>
+    </qresource>
+</RCC>
