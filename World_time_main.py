@@ -67,7 +67,7 @@ class MyPaletteManager(PaletteManager):
         base_palette = palette.get("Base", self.error_palette["standard"]["Base"])
         text_palette = palette.get("Text", self.error_palette["standard"]["Text"])
         return base_palette, text_palette
-
+#
 
 def register_resources():
     rcc_path = Path(__file__).parent / "World_time.rcc"
