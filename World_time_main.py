@@ -6,7 +6,6 @@ from PyQt6.QtWidgets import QTableWidgetItem, QMessageBox, QAbstractItemView, QD
 from PyQt6.QtCore import QResource, QTranslator, QLibraryInfo, QSettings, QDateTime, QRegularExpression, QTimeZone
 import sys
 from typing import Final
-from PyQt6.QtCore import QtMsgType
 from pathlib import Path
 
 from World_time import Ui_MainWindow
@@ -68,32 +67,6 @@ class MyPaletteManager(PaletteManager):
         base_palette = palette.get("Base", self.error_palette["standard"]["Base"])
         text_palette = palette.get("Text", self.error_palette["standard"]["Text"])
         return base_palette, text_palette
-
-
-def qt_message_handler(mode, _context, message):
-    # mode: тип сообщения (QtDebugMsg, QtInfoMsg, QtWarningMsg, QtCriticalMsg, QtFatalMsg)
-    # context: содержит информацию о файле, строке, функции
-    # message: сам текст
-    match mode:
-        case QtMsgType.QtInfoMsg:
-            mode = 'INFO'
-        case QtMsgType.QtWarningMsg:
-            mode = 'WARNING'
-        case QtMsgType.QtCriticalMsg:
-            mode = 'CRITICAL'
-        case QtMsgType.QtFatalMsg:
-            mode = 'FATAL'
-        case _:
-            mode = 'DEBUG'
-    print(f"Тип сообщения: {mode}\nQt Сообщение: {message}", file=sys.stderr)
-    # Можно изменить, убрав лишнее, например так:
-    # print(f"{message}",file=sys.stderr)
-    # Для избежания предупреждений IDE, параметр 'mode' необходимо переименовать в '_' или '_mode'
-    # и убрать команду match->case
-
-
-# Устанавливаем обработчик
-QtCore.qInstallMessageHandler(qt_message_handler)
 
 
 def register_resources():
