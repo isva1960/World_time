@@ -7,7 +7,6 @@ from PyQt6.QtCore import QResource, QTranslator, QLibraryInfo, QSettings, QDateT
 import sys
 from typing import Final
 from pathlib import Path
-
 from World_time import Ui_MainWindow
 from World_time_add_dialog import Ui_DialogAdd
 from geopy.geocoders import Nominatim

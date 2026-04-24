@@ -490,7 +490,6 @@ dict_colors = {"Темная": {
     }
 }
 
-
 class PaletteManager:
     def __init__(self, main_window, p_app, p_dict_colors, palette_combo):
         self.main_window = main_window
