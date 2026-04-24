@@ -23,8 +23,6 @@ ORGANIZATION_NAME: Final[str] = "isva_company"  # Имя организации 
 APPLICATION_NAME: Final[str] = "World_time_Application"  # Название приложения для сохранения параметров в реестре
 DB_NAME: Final[str] = 'world_cities.db'
 
-TST = True
-
 # В месте, где вы инициализируете менеджер палитр или окно:
 error_palette_theme = {"Темная": {"Base": "#8B6A6A", "Text": "white"},
                        "Светлая": {"Base": "#FF9293", "Text": "#FFFFFF"},
@@ -67,7 +65,6 @@ class MyPaletteManager(PaletteManager):
         base_palette = palette.get("Base", self.error_palette["standard"]["Base"])
         text_palette = palette.get("Text", self.error_palette["standard"]["Text"])
         return base_palette, text_palette
-#
 
 def register_resources():
     rcc_path = Path(__file__).parent / "World_time.rcc"
@@ -312,12 +309,11 @@ class AddDialog(QDialog, Ui_DialogAdd):
 
     def closeEvent(self, event):
         # Ваше действие при закрытии окна
-        if not TST:
-            if self.save_geometry != self.saveGeometry():
-                self.settings.setValue(self.window_section + "/geometry",
-                                       self.saveGeometry())  # Сохранение размера окна
-            self.save_table_state()
-            # Если состояние окна изменилось, то сохраняем
+        if self.save_geometry != self.saveGeometry():
+            self.settings.setValue(self.window_section + "/geometry",
+                                   self.saveGeometry())  # Сохранение размера окна
+        self.save_table_state()
+        # Если состояние окна изменилось, то сохраняем
         event.accept()  # Закрываем основное окно
 
     def save_table_state(self):
@@ -888,15 +884,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
 
     def closeEvent(self, event):
         # Ваше действие при закрытии окна
-        if not TST:
-            if self.save_geometry != self.saveGeometry():
-                self.settings.setValue(self.window_section + "/geometry",
-                                       self.saveGeometry())  # Сохранение размера окна
-            # Если состояние окна изменилось, то сохраняем
-            if self.save_windowState != self.saveState():
-                self.settings.setValue(self.window_section + "/windowState",
-                                       self.saveState())  # Сохранение состояния окна
-            self.save_table_state()
+        if self.save_geometry != self.saveGeometry():
+            self.settings.setValue(self.window_section + "/geometry",
+                                   self.saveGeometry())  # Сохранение размера окна
+        # Если состояние окна изменилось, то сохраняем
+        if self.save_windowState != self.saveState():
+            self.settings.setValue(self.window_section + "/windowState",
+                                   self.saveState())  # Сохранение состояния окна
+        self.save_table_state()
         if hasattr(self, 'db_connect'):
             self.db_connect.close()
         event.accept()  # Закрываем основное окно

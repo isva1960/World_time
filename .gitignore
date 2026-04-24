@@ -3,3 +3,5 @@ world_cities.db
 /build/
 /dist/
 *.spec
+*.ciq
+Отличие от тествой версии.txt
