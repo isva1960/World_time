@@ -56,7 +56,7 @@ class MyPaletteManager(PaletteManager):
         # self.error_palette["standard"] = {"Base": "#000000", "Text": "#000000"}
 
     def get_error_palette(self):
-        if self.palette_combo.currentText() == "Стандартная":
+        if self.palette_combo.currentText() == "Системная ":
             palette_theme = "standard"
         else:
             palette_theme = self.palette_combo.currentText()
@@ -395,7 +395,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
 
         self.manager = MyPaletteManager(self, app, dict_colors, error_palette_theme, self.palette_combo)
         self.palette_combo.currentTextChanged.connect(self.set_palette)
-        self.palette_combo.setCurrentText(self.settings.value(self.values_section + "/palette", "Начальная", type=str))
+        self.palette_combo.setCurrentText(self.settings.value(self.values_section + "/palette", "Системная ", type=str))
         self.on_now()
         self.city_table.setFocus()
 

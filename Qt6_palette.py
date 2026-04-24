@@ -4,7 +4,7 @@ from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtGui import QPalette
 
 APP_STYLE = "Fusion"
-# Словарь тем
+
 dict_colors = {"Темная": {
     "Window": {"Active": "#2b2b2b", "Inactive": "#2b2b2b", "Disabled": "#1e1e1e"},
     "WindowText": {"Active": "white", "Inactive": "#cccccc", "Disabled": "#666666"},
@@ -490,7 +490,7 @@ dict_colors = {"Темная": {
     }
 }
 
-# Менеджер палитр
+
 class PaletteManager:
     def __init__(self, main_window, p_app, p_dict_colors, palette_combo):
         self.main_window = main_window
@@ -542,7 +542,7 @@ class PaletteManager:
         for role_name, role_colors in self.dict_themes.items():
             self.palette_combo.addItem(role_name)
             self.add_theme(role_colors, role_colors)  # !!!!
-        self.palette_combo.addItem("Стандартная")
+        self.palette_combo.addItem("Системная")
         # def get_palettes(self):  # !!!
         current_style_name = self.app.style().objectName()
         styles = QtWidgets.QStyleFactory.keys()
@@ -562,7 +562,7 @@ class PaletteManager:
 
     def set_palette(self):  # !!!
         palette_name = self.palette_combo.currentText()
-        if palette_name == "Стандартная":
+        if palette_name == "Системная":
             self.reset_theme()
         else:
             self.apply_palette(self.dict_themes[palette_name])  # !!!
