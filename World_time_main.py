@@ -6,21 +6,25 @@ from PyQt6.QtWidgets import QTableWidgetItem, QMessageBox, QAbstractItemView, QD
 from PyQt6.QtCore import QResource, QTranslator, QLibraryInfo, QSettings, QDateTime, QRegularExpression, QTimeZone
 import sys
 from typing import Final
+from PyQt6.QtCore import QtMsgType
 from pathlib import Path
+from PyQt6 import sip
 from World_time import Ui_MainWindow
 from World_time_add_dialog import Ui_DialogAdd
+from World_time_help_M import Help_Window
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 from Qt6_palette import PaletteManager, APP_STYLE, dict_colors
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QPalette, QColor
 from datetime import datetime
+from World_time_lib import ORGANIZATION_NAME, APPLICATION_NAME
 
 city_regex = QRegularExpression(r"^(?=.*[a-zA-Zа-яА-ЯёЁ])[a-zA-Zа-яА-ЯёЁ0-9\s\.\-\,]+$")
 
-ORGANIZATION_NAME: Final[str] = "isva_company"  # Имя организации разработчика для сохранения параметров в реестре
-APPLICATION_NAME: Final[str] = "World_time_Application"  # Название приложения для сохранения параметров в реестре
 DB_NAME: Final[str] = 'world_cities.db'
+
+TST = True
 
 # В месте, где вы инициализируете менеджер палитр или окно:
 error_palette_theme = {"Темная": {"Base": "#8B6A6A", "Text": "white"},
@@ -55,7 +59,7 @@ class MyPaletteManager(PaletteManager):
         # self.error_palette["standard"] = {"Base": "#000000", "Text": "#000000"}
 
     def get_error_palette(self):
-        if self.palette_combo.currentText() == "Системная ":
+        if self.palette_combo.currentText() == "Системная":
             palette_theme = "standard"
         else:
             palette_theme = self.palette_combo.currentText()
@@ -65,6 +69,33 @@ class MyPaletteManager(PaletteManager):
         text_palette = palette.get("Text", self.error_palette["standard"]["Text"])
         return base_palette, text_palette
 
+
+def qt_message_handler(mode, _context, message):
+    # mode: тип сообщения (QtDebugMsg, QtInfoMsg, QtWarningMsg, QtCriticalMsg, QtFatalMsg)
+    # context: содержит информацию о файле, строке, функции
+    # message: сам текст
+    match mode:
+        case QtMsgType.QtInfoMsg:
+            mode = 'INFO'
+        case QtMsgType.QtWarningMsg:
+            mode = 'WARNING'
+        case QtMsgType.QtCriticalMsg:
+            mode = 'CRITICAL'
+        case QtMsgType.QtFatalMsg:
+            mode = 'FATAL'
+        case _:
+            mode = 'DEBUG'
+    print(f"Тип сообщения: {mode}\nQt Сообщение: {message}", file=sys.stderr)
+    # Можно изменить, убрав лишнее, например так:
+    # print(f"{message}",file=sys.stderr)
+    # Для избежания предупреждений IDE, параметр 'mode' необходимо переименовать в '_' или '_mode'
+    # и убрать команду match->case
+
+
+# Устанавливаем обработчик
+QtCore.qInstallMessageHandler(qt_message_handler)
+
+
 def register_resources():
     rcc_path = Path(__file__).parent / "World_time.rcc"
     rcc_path_str = str(rcc_path)
@@ -73,9 +104,12 @@ def register_resources():
 
 class AddDialog(QDialog, Ui_DialogAdd):
     def __init__(self, main_window):
-        super().__init__()
+        # Передаем main_window в super, чтобы Qt понял, кто родитель
+        super().__init__(parent=main_window)
         self.setupUi(self)
         self.main_window = main_window
+        self.help_win = None
+        self.global_help = None
         self.db_connect = main_window.db_connect
         self.settings = QSettings(ORGANIZATION_NAME, APPLICATION_NAME)
         self.settings = QSettings(ORGANIZATION_NAME, APPLICATION_NAME)
@@ -93,6 +127,7 @@ class AddDialog(QDialog, Ui_DialogAdd):
         self.city_edit.setValidator(validator)
         self.find_button.clicked.connect(self.on_find_city)
         self.add_button.clicked.connect(self.on_add_city)
+        self.help_button.clicked.connect(self.help_window)
         self.find_cities_table.itemSelectionChanged.connect(self.on_selection_changed)
         self.add_button.setEnabled(False)
         # Редактирование начнется при двойном клике или нажатии F2
@@ -109,6 +144,43 @@ class AddDialog(QDialog, Ui_DialogAdd):
         self.old_city_full = ""
         self.city_root = ""
         self.find_city_operation = False
+
+    def help_window(self):
+        # 1. Пытаемся найти главное окно через родителя
+        main_win = self.parent()
+
+        # 2. Если родитель есть, вызываем помощь у него
+        if main_win:
+            main_win.help_window()
+        else:
+            # 3. Если родителя нет (экспериментальный запуск),
+            # создаем окно БЕЗ привязки к self (глобально)
+            if not hasattr(self, 'global_help'):
+                self.global_help = Help_Window()
+            self.global_help.show()
+
+    def help_window2(self):
+        # Если окна нет
+        if not hasattr(self, 'help_win') or self.help_win is None:
+            # Создаем БЕЗ родителя (parent=None), чтобы оно было самостоятельным
+            self.help_win = Help_Window()
+
+            # Устанавливаем флаг Window, чтобы оно стало отдельным окном в панели задач
+        from PyQt6.QtCore import Qt
+        self.help_win.setWindowFlags(Qt.WindowType.Window)
+
+        self.help_win.show()
+        self.help_win.raise_()
+        self.help_win.activateWindow()
+
+    def help_window1(self):
+        # Если окна нет или оно закрыто (удалено)
+        if not hasattr(self, 'help_win') or self.help_win is None:
+            self.help_win = Help_Window()
+
+        self.help_win.show()
+        self.help_win.raise_()
+        self.help_win.activateWindow()
 
     def restore_table_state(self):
         self.find_cities_table_columns_count = self.find_cities_table.columnCount()
@@ -302,17 +374,20 @@ class AddDialog(QDialog, Ui_DialogAdd):
                 QMessageBox.information(self, "Добавление", f"Населенный пункт {display_name} добавлен.")
                 self.find_cities_table.setItem(row, 3, QtWidgets.QTableWidgetItem("Добавлен в БД"))
                 self.on_selection_changed()
+                self.main_window.update_city_combos()
+                self.main_window.refresh_main_table()
             except sqlite3.Error as e:
                 QMessageBox.critical(self, "Ошибка БД", f"Не удалось добавить: {e}")
                 self.db_connect.rollback()  # Отменяет операцию, если что-то пошло не так
 
     def closeEvent(self, event):
         # Ваше действие при закрытии окна
-        if self.save_geometry != self.saveGeometry():
-            self.settings.setValue(self.window_section + "/geometry",
-                                   self.saveGeometry())  # Сохранение размера окна
-        self.save_table_state()
-        # Если состояние окна изменилось, то сохраняем
+        if not TST:
+            if self.save_geometry != self.saveGeometry():
+                self.settings.setValue(self.window_section + "/geometry",
+                                       self.saveGeometry())  # Сохранение размера окна
+            self.save_table_state()
+            # Если состояние окна изменилось, то сохраняем
         event.accept()  # Закрываем основное окно
 
     def save_table_state(self):
@@ -332,6 +407,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
         super().__init__()
         self.setupUi(self)
         self.target_combo = None
+        self.help_win = None
+        self.dialog = None
         self.settings = QSettings(ORGANIZATION_NAME, APPLICATION_NAME)
         self.window_section = "Main_Window"  # Секция параметров окна
         self.values_section = "Values"  # Секция параметров переменных
@@ -360,6 +437,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
         self.calculation_datetime.dateTimeChanged.connect(self.refresh_main_table)
         self.delete_button.clicked.connect(self.delete_selected_city)
         self.add_button.clicked.connect(self.add_city)
+        self.help_button.clicked.connect(self.help_window)
         self.save_city_button.clicked.connect(self.on_save_city)
         self.save_palette_button.clicked.connect(self.on_save_palette)
         self.save_sorted_button.clicked.connect(self.on_save_sorted)
@@ -394,7 +472,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
 
         self.manager = MyPaletteManager(self, app, dict_colors, error_palette_theme, self.palette_combo)
         self.palette_combo.currentTextChanged.connect(self.set_palette)
-        self.palette_combo.setCurrentText(self.settings.value(self.values_section + "/palette", "Системная ", type=str))
+        self.palette_combo.setCurrentText(
+            self.settings.value(self.values_section + "/palette", "Системная", type=str))
         self.on_now()
         self.city_table.setFocus()
 
@@ -410,6 +489,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
             return offset / 3600
         except (Exception,):
             return 0
+
+    # В ГЛАВНОМ ОКНЕ
+    def help_window(self):
+        if self.help_win is None:
+            self.help_win = Help_Window()
+        self.help_win.show()
+        self.help_win.raise_()
+        self.help_win.activateWindow()
 
     def change_search_logic(self):
         self.reset_table_visibility()
@@ -587,10 +674,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
         self.settings.setValue(self.values_section + "/palette", self.palette_combo.currentText())
 
     def add_city(self):
-        dialog = AddDialog(self)
-        dialog.exec()
-        self.update_city_combos()
-        self.refresh_main_table()
+        self.dialog = AddDialog(self)
+        # Это сделает диалог модальным только для главного окна,
+        # но позволит окну Help (у которого другой родитель или нет его)
+        # спокойно перемещаться выше или ниже диалога.
+        self.dialog.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
+        self.dialog.show()
 
     def set_default_sorted(self):
         index = self.sort_combo.findText(self.default_sorted)
@@ -883,16 +972,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
 
     def closeEvent(self, event):
         # Ваше действие при закрытии окна
-        if self.save_geometry != self.saveGeometry():
-            self.settings.setValue(self.window_section + "/geometry",
-                                   self.saveGeometry())  # Сохранение размера окна
-        # Если состояние окна изменилось, то сохраняем
-        if self.save_windowState != self.saveState():
-            self.settings.setValue(self.window_section + "/windowState",
-                                   self.saveState())  # Сохранение состояния окна
-        self.save_table_state()
+        if not TST:
+            if self.save_geometry != self.saveGeometry():
+                self.settings.setValue(self.window_section + "/geometry",
+                                       self.saveGeometry())  # Сохранение размера окна
+            # Если состояние окна изменилось, то сохраняем
+            if self.save_windowState != self.saveState():
+                self.settings.setValue(self.window_section + "/windowState",
+                                       self.saveState())  # Сохранение состояния окна
+            self.save_table_state()
         if hasattr(self, 'db_connect'):
             self.db_connect.close()
+
+        if self.help_win is not None and not sip.isdeleted(self.help_win):
+            self.help_win.close()
+
         event.accept()  # Закрываем основное окно
 
     def save_table_state(self):

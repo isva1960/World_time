@@ -22,6 +22,12 @@
     <height>659</height>
    </size>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>12</pointsize>
+    <bold>true</bold>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Добавление населенного пункта</string>
   </property>
@@ -151,6 +157,16 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QPushButton" name="help_button">
+       <property name="text">
+        <string>F1 Помощь</string>
+       </property>
+       <property name="shortcut">
+        <string>F1</string>
+       </property>
+      </widget>
+     </item>
      <item>
       <widget class="QPushButton" name="exit_button">
        <property name="font">

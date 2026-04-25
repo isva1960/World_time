@@ -1,0 +1,8 @@
+{
+	"1": ["Начальная страница", "index.html", []],
+	"2": ["Запуск программы", "zapusk_programmy.html", []],
+	"3": ["Окно игры", "okno_igry.html", []],
+	"4": ["Название раздела", "nazvanie_razdela.html", []],
+	"5": ["Подключение к серверу", "podklyuchenie_k_serveru.html", []],
+	"6": ["Расстановка кораблей", "rasstanovka_korablej.html", []]
+}
