@@ -23,7 +23,6 @@ city_regex = QRegularExpression(r"^(?=.*[a-zA-Zа-яА-ЯёЁ])[a-zA-Zа-яА-Я
 
 DB_NAME: Final[str] = 'world_cities.db'
 
-# В месте, где вы инициализируете менеджер палитр или окно:
 error_palette_theme = {"Темная": {"Base": "#8B6A6A", "Text": "white"},
                        "Светлая": {"Base": "#FF9293", "Text": "#FFFFFF"},
                        "Зеленая": {"Base": "#708628", "Text": "#0f2414"},
@@ -65,6 +64,7 @@ class MyPaletteManager(PaletteManager):
         base_palette = palette.get("Base", self.error_palette["standard"]["Base"])
         text_palette = palette.get("Text", self.error_palette["standard"]["Text"])
         return base_palette, text_palette
+
 
 
 def register_resources():
@@ -307,8 +307,6 @@ class AddDialog(QDialog, Ui_DialogAdd):
                 QMessageBox.information(self, "Добавление", f"Населенный пункт {display_name} добавлен.")
                 self.find_cities_table.setItem(row, 3, QtWidgets.QTableWidgetItem("Добавлен в БД"))
                 self.on_selection_changed()
-                self.main_window.update_city_combos()
-                self.main_window.refresh_main_table()
             except sqlite3.Error as e:
                 QMessageBox.critical(self, "Ошибка БД", f"Не удалось добавить: {e}")
                 self.db_connect.rollback()  # Отменяет операцию, если что-то пошло не так
@@ -320,7 +318,8 @@ class AddDialog(QDialog, Ui_DialogAdd):
                                    self.saveGeometry())  # Сохранение размера окна
         self.save_table_state()
         # Если состояние окна изменилось, то сохраняем
-        event.accept()  # Закрываем основное окно
+        self.accept()  # Это закроет диалог и отправит сигнал "готово"
+        # event.accept()  # Закрываем основное окно
 
     def save_table_state(self):
         # Получаем состояние горизонтального заголовка (ширина, порядок, видимость)
@@ -651,6 +650,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
 
     def add_city(self):
         self.dialog = AddDialog(self)
+        # Обновления после закрытия диалога
+        self.dialog.finished.connect(self.update_city_combos)
+        self.dialog.finished.connect(self.refresh_main_table)
         # Это сделает диалог модальным только для главного окна,
         # но позволит окну Help (у которого другой родитель или нет его)
         # спокойно перемещаться выше или ниже диалога.
@@ -976,12 +978,9 @@ if __name__ == "__main__":
     register_resources()
     app = QApplication(sys.argv)
     app.setStyle(APP_STYLE)
-    # Создаём переводчик
+    # 1. Ваш существующий перевод (для кнопок и стандартных окон)
     qt_translator = QTranslator()
-    qt_translator.load(
-        "qtbase_ru",
-        QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)
-    )
+    qt_translator.load("qtbase_ru", QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath))
     app.installTranslator(qt_translator)
     window = MainWindow()
     window.show()

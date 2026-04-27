@@ -14,7 +14,7 @@ class Ui_Help_Window(object):
         Help_Window.setObjectName("Help_Window")
         Help_Window.resize(847, 747)
         Help_Window.setMinimumSize(QtCore.QSize(736, 658))
-        Help_Window.setMaximumSize(QtCore.QSize(1100, 871))
+        Help_Window.setMaximumSize(QtCore.QSize(1200, 871))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/kworldclock.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         Help_Window.setWindowIcon(icon)
@@ -27,25 +27,12 @@ class Ui_Help_Window(object):
         self.frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
         self.frame.setObjectName("frame")
-        self.gridLayout.addWidget(self.frame, 0, 0, 1, 3)
-        spacerItem = QtWidgets.QSpacerItem(254, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
-        self.gridLayout.addItem(spacerItem, 1, 0, 1, 1)
-        self.pushB_Close = QtWidgets.QPushButton(parent=self.centralwidget)
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        font.setBold(True)
-        self.pushB_Close.setFont(font)
-        self.pushB_Close.setObjectName("pushB_Close")
-        self.gridLayout.addWidget(self.pushB_Close, 1, 1, 1, 1)
-        spacerItem1 = QtWidgets.QSpacerItem(254, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
-        self.gridLayout.addItem(spacerItem1, 1, 2, 1, 1)
+        self.gridLayout.addWidget(self.frame, 0, 0, 1, 2)
         Help_Window.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(Help_Window)
-        self.pushB_Close.clicked.connect(Help_Window.close) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(Help_Window)
 
     def retranslateUi(self, Help_Window):
         _translate = QtCore.QCoreApplication.translate
         Help_Window.setWindowTitle(_translate("Help_Window", "Помощь \"Мировое время\""))
-        self.pushB_Close.setText(_translate("Help_Window", "Закрыть"))
