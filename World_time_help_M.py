@@ -1,23 +1,13 @@
-import sys, os
+import os
 from PyQt6 import QtWidgets, QtCore
-from PyQt6.QtCore import QTranslator, QLibraryInfo, QSettings, QResource
+from PyQt6.QtCore import QSettings
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtCore import QUrl
-from PyQt6.QtWidgets import QVBoxLayout, QApplication
+from PyQt6.QtWidgets import QVBoxLayout
 from World_time_lib import ORGANIZATION_NAME, APPLICATION_NAME
 from World_time_help import Ui_Help_Window
-from pathlib import Path
 
-TST = True
-
-
-def register_resources():
-    rcc_path = Path(__file__).parent / "World_time.rcc"
-    rcc_path_str = str(rcc_path)
-    QResource.registerResource(rcc_path_str)
-
-
-class Help_Window(QtWidgets.QMainWindow, Ui_Help_Window):
+class HelpWindow(QtWidgets.QMainWindow, Ui_Help_Window):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -34,12 +24,13 @@ class Help_Window(QtWidgets.QMainWindow, Ui_Help_Window):
             self.restoreState(self.save_windowState)
 
         self.browser = QWebEngineView()
-        # Абсолютный путь к index.html
-        # Создаём layout для frame
-        layout = QVBoxLayout(self.frame)
-        layout.addWidget(self.browser)
-        # Привязываем layout к frame
-        self.frame.setLayout(layout)
+
+        # Проверяем, нет ли уже layout у frame (Designer иногда его создает)
+        if self.frame.layout() is None:
+            layout = QVBoxLayout(self.frame)
+            layout.setContentsMargins(0, 0, 0, 0)  # Убираем белые рамки вокруг браузера
+            self.frame.setLayout(layout)
+        self.frame.layout().addWidget(self.browser)
         self.load_url()
 
     def load_url(self, url=None):
@@ -55,28 +46,11 @@ class Help_Window(QtWidgets.QMainWindow, Ui_Help_Window):
     def closeEvent(self, event):
         # Ваше действие при закрытии окна
         # Если размер окна изменился, то сохраняем.
-        if not TST:
-            if self.save_geometry != self.saveGeometry():
-                self.settings.setValue(self.window_section + "/geometry",
-                                       self.saveGeometry())  # Сохранение размера окна
-            # Если состояние окна изменилось, то сохраняем
-            if self.save_windowState != self.saveState():
-                self.settings.setValue(self.window_section + "/windowState",
-                                       self.saveState())  # Сохранение состояния окна
+        if self.save_geometry != self.saveGeometry():
+            self.settings.setValue(self.window_section + "/geometry",
+                                   self.saveGeometry())  # Сохранение размера окна
+        # Если состояние окна изменилось, то сохраняем
+        if self.save_windowState != self.saveState():
+            self.settings.setValue(self.window_section + "/windowState",
+                                   self.saveState())  # Сохранение состояния окна
         event.accept()  # Закрываем окно
-
-
-if __name__ == '__main__':
-    register_resources()
-    app = QApplication(sys.argv)
-    # app.setStyle(APP_STYLE)
-    # Создаём переводчик
-    qt_translator = QTranslator()
-    qt_translator.load(
-        "qtbase_ru",
-        QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)
-    )
-    app.installTranslator(qt_translator)
-    Window = Help_Window()
-    Window.show()
-    sys.exit(app.exec())

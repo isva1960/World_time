@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1282</width>
-    <height>657</height>
+    <width>845</width>
+    <height>617</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -16,16 +16,10 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
-  <property name="minimumSize">
-   <size>
-    <width>1198</width>
-    <height>438</height>
-   </size>
-  </property>
   <property name="maximumSize">
    <size>
-    <width>1282</width>
-    <height>657</height>
+    <width>1300</width>
+    <height>900</height>
    </size>
   </property>
   <property name="font">
@@ -87,6 +81,10 @@
         </property>
        </widget>
       </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_6">
       <item>
        <widget class="QLabel" name="label_2">
         <property name="maximumSize">
@@ -138,6 +136,57 @@
          <string>Сейчас</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="minimumSize">
+         <size>
+          <width>122</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>122</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Палитра цветов:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="palette_combo">
+        <property name="minimumSize">
+         <size>
+          <width>250</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>500</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_6">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>
@@ -197,7 +246,7 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>360</width>
+          <width>100</width>
           <height>0</height>
          </size>
         </property>
@@ -209,6 +258,10 @@
         </property>
        </widget>
       </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_8">
       <item>
        <widget class="QLabel" name="label_4">
         <property name="maximumSize">
@@ -229,7 +282,7 @@
        <widget class="QComboBox" name="sort_combo">
         <property name="minimumSize">
          <size>
-          <width>200</width>
+          <width>120</width>
           <height>0</height>
          </size>
         </property>
@@ -255,26 +308,16 @@
         </item>
        </widget>
       </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="label_5">
         <property name="minimumSize">
          <size>
-          <width>122</width>
+          <width>100</width>
           <height>0</height>
          </size>
         </property>
-        <property name="maximumSize">
-         <size>
-          <width>122</width>
-          <height>16777215</height>
-         </size>
-        </property>
         <property name="text">
-         <string>Палитра цветов:</string>
+         <string>Показывать:</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
@@ -282,23 +325,37 @@
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="palette_combo">
-        <property name="minimumSize">
-         <size>
-          <width>500</width>
-          <height>0</height>
-         </size>
+       <widget class="QCheckBox" name="longitude_check">
+        <property name="text">
+         <string>Долготу</string>
         </property>
-        <property name="maximumSize">
-         <size>
-          <width>500</width>
-          <height>16777215</height>
-         </size>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_3">
+       <widget class="QCheckBox" name="latitude_check">
+        <property name="text">
+         <string>Широту</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="timezone_check">
+        <property name="text">
+         <string>Часовой пояс</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_7">
         <property name="orientation">
          <enum>Qt::Orientation::Horizontal</enum>
         </property>
@@ -476,6 +533,36 @@
        </widget>
       </item>
       <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
        <widget class="QPushButton" name="save_sorted_button">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -489,7 +576,14 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_2">
+       <widget class="QPushButton" name="columnvisibility_button">
+        <property name="text">
+         <string>Сохранить видимость столбцов</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
         <property name="orientation">
          <enum>Qt::Orientation::Horizontal</enum>
         </property>
@@ -508,8 +602,6 @@
  </widget>
  <tabstops>
   <tabstop>city_combo</tabstop>
-  <tabstop>calculation_datetime</tabstop>
-  <tabstop>now_button</tabstop>
   <tabstop>radio_search</tabstop>
   <tabstop>radio_filter</tabstop>
   <tabstop>city_table</tabstop>

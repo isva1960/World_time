@@ -6,12 +6,24 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>925</width>
-    <height>806</height>
+    <width>847</width>
+    <height>747</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>736</width>
+    <height>658</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1100</width>
+    <height>871</height>
+   </size>
+  </property>
   <property name="windowTitle">
-   <string>Помощь к игре &quot;Морской бой&quot;</string>
+   <string>Помощь &quot;Мировое время&quot;</string>
   </property>
   <property name="windowIcon">
    <iconset resource="World_time.qrc">
@@ -21,6 +33,12 @@
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0" colspan="3">
      <widget class="QFrame" name="frame">
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>200</height>
+       </size>
+      </property>
       <property name="frameShape">
        <enum>QFrame::Shape::StyledPanel</enum>
       </property>
