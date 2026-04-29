@@ -4,4 +4,7 @@ world_cities.db
 /dist/
 *.spec
 *.ciq
-Отличие от тествой версии.txt
+*.ci
+Отличие от тестовой версии.txt
+license.rtf
+my_requirements.txt
