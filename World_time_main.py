@@ -6,7 +6,6 @@ from PyQt6.QtWidgets import QTableWidgetItem, QMessageBox, QAbstractItemView, QD
 from PyQt6.QtCore import QResource, QTranslator, QLibraryInfo, QSettings, QDateTime, QRegularExpression, QTimeZone
 import sys
 from typing import Final
-from PyQt6.QtCore import QtMsgType
 from pathlib import Path
 from PyQt6 import sip
 from World_time import Ui_MainWindow
@@ -24,8 +23,6 @@ city_regex = QRegularExpression(r"^(?=.*[a-zA-Zа-яА-ЯёЁ])[a-zA-Zа-яА-Я
 DB_NAME: Final[str] = 'world_cities.db'
 ORGANIZATION_NAME: Final[str] = "isva_company"  # Имя организации разработчика для сохранения параметров в реестре
 APPLICATION_NAME: Final[str] = "World_time_Application"  # Название приложения для сохранения параметров в реестре
-
-TST = False
 
 # В месте, где вы инициализируете менеджер палитр или окно:
 error_palette_theme = {"Темная": {"Base": "#8B6A6A", "Text": "white"},
@@ -71,32 +68,6 @@ class MyPaletteManager(PaletteManager):
         return base_palette, text_palette
 
 
-def qt_message_handler(mode, _context, message):
-    # mode: тип сообщения (QtDebugMsg, QtInfoMsg, QtWarningMsg, QtCriticalMsg, QtFatalMsg)
-    # context: содержит информацию о файле, строке, функции
-    # message: сам текст
-    match mode:
-        case QtMsgType.QtInfoMsg:
-            mode = 'INFO'
-        case QtMsgType.QtWarningMsg:
-            mode = 'WARNING'
-        case QtMsgType.QtCriticalMsg:
-            mode = 'CRITICAL'
-        case QtMsgType.QtFatalMsg:
-            mode = 'FATAL'
-        case _:
-            mode = 'DEBUG'
-    print(f"Тип сообщения: {mode}\nQt Сообщение: {message}", file=sys.stderr)
-    # Можно изменить, убрав лишнее, например так:
-    # print(f"{message}",file=sys.stderr)
-    # Для избежания предупреждений IDE, параметр 'mode' необходимо переименовать в '_' или '_mode'
-    # и убрать команду match->case
-
-
-# Устанавливаем обработчик
-QtCore.qInstallMessageHandler(qt_message_handler)
-
-
 def register_resources():
     rcc_path = Path(__file__).parent / "World_time.rcc"
     rcc_path_str = str(rcc_path)
@@ -127,8 +98,8 @@ class AddDialog(QDialog, Ui_DialogAdd):
         self.city_edit.setValidator(validator)
         self.find_button.clicked.connect(self.on_find_city)
         self.add_button.clicked.connect(self.on_add_city)
-        self.help_button.clicked.connect(lambda: self.main_window.help_window(url="Help_World_time//addition.html",
-                                                                              is_main_window=False))  # Help через головное окно
+        self.help_button.clicked.connect(lambda: self.main_window.show_help(help_url="Help_World_time//addition.html",
+                                                                            is_main_window=False))  # Help через головное окно
         self.find_cities_table.itemSelectionChanged.connect(self.on_selection_changed)
         self.add_button.setEnabled(False)
         # Редактирование начнется при двойном клике или нажатии F2
@@ -344,12 +315,11 @@ class AddDialog(QDialog, Ui_DialogAdd):
 
     def closeEvent(self, event):
         # Ваше действие при закрытии окна
-        if not TST:
-            if self.save_geometry != self.saveGeometry():
-                self.settings.setValue(self.window_section + "/geometry",
-                                       self.saveGeometry())  # Сохранение размера окна
-            self.save_table_state()
-            # Если состояние окна изменилось, то сохраняем
+        if self.save_geometry != self.saveGeometry():
+            self.settings.setValue(self.window_section + "/geometry",
+                                   self.saveGeometry())  # Сохранение размера окна
+        self.save_table_state()
+        # Если состояние окна изменилось, то сохраняем
         self.accept()  # Это закроет диалог и отправит сигнал "готово"
         # event.accept()  # Закрываем основное окно
 
@@ -400,7 +370,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
         self.calculation_datetime.dateTimeChanged.connect(self.refresh_main_table)
         self.delete_button.clicked.connect(self.delete_selected_city)
         self.add_button.clicked.connect(self.add_city)
-        self.help_button.clicked.connect(lambda: self.help_window())
+        self.help_button.clicked.connect(lambda: self.show_help())
         self.save_city_button.clicked.connect(self.on_save_city)
         self.save_palette_button.clicked.connect(self.on_save_palette)
         self.save_sorted_button.clicked.connect(self.on_save_sorted)
@@ -487,20 +457,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
             return 0
 
     # В ГЛАВНОМ ОКНЕ
-    def help_window(self, url=None, is_main_window=True):
-        p_url = "Help_World_time//index.html" if url is None else url
+    def show_help(self, help_url=None, is_main_window=True):
+        current_help_url = "Help_World_time//index.html" if help_url is None else help_url
         if is_main_window:
             if self.help_win is None:
                 self.help_win = HelpWindow(org_name=ORGANIZATION_NAME, app_name=APPLICATION_NAME,
                                            window_section="Help_Window", window_title='"Помощь "Мировое время"',
-                                           icon_name=":/kworldclock.png", url=p_url)
+                                           icon_name=":/kworldclock.png", url=current_help_url)
         else:
             if self.help_win is None:
                 self.help_win = HelpWindow(org_name=ORGANIZATION_NAME, app_name=APPLICATION_NAME,
                                            window_section="Help_Window", window_title='"Помощь "Мировое время"',
-                                           icon_name=":/kworldclock.png", url=p_url)
+                                           icon_name=":/kworldclock.png", url=current_help_url)
             else:
-                self.help_win.load_url(p_url)
+                self.help_win.load_url(current_help_url)
         self.help_win.show()
         self.help_win.raise_()
         self.help_win.activateWindow()
@@ -993,15 +963,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
 
     def closeEvent(self, event):
         # Ваше действие при закрытии окна
-        if not TST:
-            if self.save_geometry != self.saveGeometry():
-                self.settings.setValue(self.window_section + "/geometry",
-                                       self.saveGeometry())  # Сохранение размера окна
-            # Если состояние окна изменилось, то сохраняем
-            if self.save_windowState != self.saveState():
-                self.settings.setValue(self.window_section + "/windowState",
-                                       self.saveState())  # Сохранение состояния окна
-            self.save_table_state()
+        if self.save_geometry != self.saveGeometry():
+            self.settings.setValue(self.window_section + "/geometry",
+                                   self.saveGeometry())  # Сохранение размера окна
+        # Если состояние окна изменилось, то сохраняем
+        if self.save_windowState != self.saveState():
+            self.settings.setValue(self.window_section + "/windowState",
+                                   self.saveState())  # Сохранение состояния окна
+        self.save_table_state()
         if hasattr(self, 'db_connect'):
             self.db_connect.close()
         if self.help_win is not None and not sip.isdeleted(self.help_win):
