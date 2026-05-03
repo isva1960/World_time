@@ -79,7 +79,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="reregion_edit">
+      <widget class="QLineEdit" name="region_edit">
        <property name="font">
         <font>
          <pointsize>12</pointsize>

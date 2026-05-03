@@ -2,10 +2,9 @@ import sqlite3
 import sys
 from zoneinfo import ZoneInfo
 from PyQt6 import QtCore, QtWidgets, sip
-from PyQt6.QtGui import QRegularExpressionValidator, QPalette, QColor
+from PyQt6.QtGui import QRegularExpressionValidator, QPalette, QColor, QShowEvent
 from PyQt6.QtWidgets import QTableWidgetItem, QMessageBox, QAbstractItemView, QDialog, QApplication
-from PyQt6.QtCore import QResource, QTranslator, QLibraryInfo, QSettings, QDateTime, QRegularExpression, QTimeZone, \
-    QtMsgType
+from PyQt6.QtCore import QResource, QTranslator, QLibraryInfo, QSettings, QDateTime, QRegularExpression, QTimeZone
 from typing import Final
 from pathlib import Path
 from geopy.geocoders import Nominatim
@@ -23,7 +22,6 @@ ORGANIZATION_NAME: Final[str] = "isva_company"  # Имя организации 
 APPLICATION_NAME: Final[str] = "World_time_Application"  # Название приложения для сохранения параметров в реестре
 
 # После отладки удалить!!!
-TST = False
 
 # В месте, где вы инициализируете менеджер палитр или окно:
 error_palette_theme = {"Темная": {"Base": "#8B6A6A", "Text": "white"},
@@ -68,33 +66,6 @@ class MyPaletteManager(PaletteManager):
         text_palette = palette.get("Text", self.error_palette["standard"]["Text"])
         return base_palette, text_palette
 
-
-# После отладки удалить!!!
-def qt_message_handler(mode, _context, message):
-    # mode: тип сообщения (QtDebugMsg, QtInfoMsg, QtWarningMsg, QtCriticalMsg, QtFatalMsg)
-    # context: содержит информацию о файле, строке, функции
-    # message: сам текст
-    match mode:
-        case QtMsgType.QtInfoMsg:
-            mode = 'INFO'
-        case QtMsgType.QtWarningMsg:
-            mode = 'WARNING'
-        case QtMsgType.QtCriticalMsg:
-            mode = 'CRITICAL'
-        case QtMsgType.QtFatalMsg:
-            mode = 'FATAL'
-        case _:
-            mode = 'DEBUG'
-    print(f"Тип сообщения: {mode}\nQt Сообщение: {message}", file=sys.stderr)
-    # Можно изменить, убрав лишнее, например так:
-    # print(f"{message}",file=sys.stderr)
-    # Для избежания предупреждений IDE, параметр 'mode' необходимо переименовать в '_' или '_mode'
-    # и убрать команду match->case
-
-
-# После отладки удалить!!!
-# Устанавливаем обработчик
-QtCore.qInstallMessageHandler(qt_message_handler)
 
 
 def register_resources():
@@ -144,6 +115,13 @@ class AddDialog(QDialog, Ui_DialogAdd):
         self.old_city_full = ""
         self.city_root = ""
         self.find_city_operation = False
+
+    def showEvent(self, event: QShowEvent):
+        # Вызываем родительский метод, чтобы обеспечить правильную работу Qt
+        self.city_edit.setText("")
+        self.region_edit.setText("")
+        self.find_cities_table.setRowCount(0)
+        super().showEvent(event)
 
     def restore_table_state(self):
         self.find_cities_table_columns_count = self.find_cities_table.columnCount()
@@ -226,7 +204,7 @@ class AddDialog(QDialog, Ui_DialogAdd):
 
     def on_find_city(self):
         city_query = self.city_edit.text().strip()
-        region_query = self.reregion_edit.text().strip()
+        region_query = self.region_edit.text().strip()
         if not self.city_edit.hasAcceptableInput():
             # Выводим ошибку пользователю
             QMessageBox.critical(self, 'Ошибка!', 'Название должно содержать буквы!')
@@ -344,12 +322,11 @@ class AddDialog(QDialog, Ui_DialogAdd):
     def closeEvent(self, event):
         # Ваше действие при закрытии окна
         # После отладки удалить!!!
-        if not TST:
-            if self.save_geometry != self.saveGeometry():
-                self.settings.setValue(self.window_section + "/geometry",
-                                       self.saveGeometry())  # Сохранение размера окна
-            self.save_table_state()
-            # Если состояние окна изменилось, то сохраняем
+        if self.save_geometry != self.saveGeometry():
+            self.settings.setValue(self.window_section + "/geometry",
+                                   self.saveGeometry())  # Сохранение размера окна
+        self.save_table_state()
+        # Если состояние окна изменилось, то сохраняем
         self.accept()  # Это закроет диалог и отправит сигнал "готово"
         # event.accept()  # Закрываем основное окно
 
@@ -372,6 +349,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
         self.target_combo = None
         self.help_win = None
         self.dialog = None
+        self.save_rowcount = 0
         self.settings = QSettings(ORGANIZATION_NAME, APPLICATION_NAME)
         self.window_section = "Main_Window"  # Секция параметров окна
         self.values_section = "Values"  # Секция параметров переменных
@@ -692,15 +670,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
             self.settings.setValue(self.window_section + "/timezone_enabled", self.timezone_state)
 
     def add_city(self):
-        self.dialog = AddDialog(self)
-        # Обновления после закрытия диалога
-        self.dialog.finished.connect(self.update_city_combos)
-        self.dialog.finished.connect(self.refresh_main_table)
-        # Это сделает диалог модальным только для главного окна,
-        # но позволит окну Help (у которого другой родитель или нет его)
-        # спокойно перемещаться выше или ниже диалога.
-        self.dialog.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
+        self.save_rowcount = self.city_table.rowCount()
+        if self.dialog is None:
+            self.dialog = AddDialog(self)
+            # !!!!!
+            # Обновления после закрытия диалога
+            self.dialog.finished.connect(self.update_city_combos)
+            self.dialog.finished.connect(self.refresh_main_table)
+            self.dialog.finished.connect(self.refresh_rowcount)
+            # Это сделает диалог модальным только для главного окна,
+            # но позволит окну Help (у которого другой родитель или нет его)
+            # спокойно перемещаться выше или ниже диалога.
+            self.dialog.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
         self.dialog.show()
+
+    def refresh_rowcount(self):
+        if self.save_rowcount != self.city_table.rowCount():
+            self.on_now()
 
     def set_default_sorted(self):
         index = self.sort_combo.findText(self.default_sorted)
@@ -869,60 +855,61 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
         return diff_str
 
     def refresh_main_table(self):
+        if self.city_combo.count() > 0:
+            source_tz, source_longitude = self.city_combo.currentData().split("~")
 
-        source_tz, source_longitude = self.city_combo.currentData().split("~")
+            # Берем скрытое значение (timezone)
+            input_dt = self.calculation_datetime.dateTime().toPyDateTime()  # Конвертируем в Python datetime
 
-        # Берем скрытое значение (timezone)
-        input_dt = self.calculation_datetime.dateTime().toPyDateTime()  # Конвертируем в Python datetime
+            if not source_tz:
+                self.edit_delete_button_state()
+                return
 
-        if not source_tz:
-            self.edit_delete_button_state()
-            return
+            # 2. Получаем список словарей из нашего метода логики
+            cities_data = self.get_time_data(source_tz, input_dt, self.city_combo.currentText(),
+                                             float(source_longitude))
 
-        # 2. Получаем список словарей из нашего метода логики
-        cities_data = self.get_time_data(source_tz, input_dt, self.city_combo.currentText(), float(source_longitude))
+            # 3. Очищаем таблицу перед заполнением
+            self.city_table.setRowCount(0)
 
-        # 3. Очищаем таблицу перед заполнением
-        self.city_table.setRowCount(0)
+            # 4. Заполняем таблицу строками
+            if cities_data is not None:
+                self.city_table.blockSignals(True)
+                for row_idx, city in enumerate(cities_data):
+                    self.city_table.insertRow(row_idx)
 
-        # 4. Заполняем таблицу строками
-        if cities_data is not None:
-            self.city_table.blockSignals(True)
-            for row_idx, city in enumerate(cities_data):
-                self.city_table.insertRow(row_idx)
-
-                name_item = QTableWidgetItem(city['display_name'])
-                # Устанавливаем флаги: стандартные + возможность редактирования
-                # noinspection PyTypeChecker
-                name_item.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled |
-                                   QtCore.Qt.ItemFlag.ItemIsSelectable |
-                                   QtCore.Qt.ItemFlag.ItemIsEditable)  # noinspection
-                self.city_table.setItem(row_idx, 0, name_item)
-                # Видимые данные
-                other_data = [f"{city['lat']:.6f}", f"{city['lon']:.6f}", city['timezone'], city['local_time'],
-                              city['difference'], str(city['osm_id']), city['osm_type']]
-
-                for i, value in enumerate(other_data, start=1):
-                    item = QtWidgets.QTableWidgetItem(value)
-
-                    # Условие для первых двух колонок (так как start=1, это i=1 и i=2)
-                    if i <= 2:
-                        item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignRight |
-                                              QtCore.Qt.AlignmentFlag.AlignVCenter)
-
-                    # Ваши флаги
+                    name_item = QTableWidgetItem(city['display_name'])
+                    # Устанавливаем флаги: стандартные + возможность редактирования
                     # noinspection PyTypeChecker
-                    item.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled |
-                                  QtCore.Qt.ItemFlag.ItemIsSelectable)
+                    name_item.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled |
+                                       QtCore.Qt.ItemFlag.ItemIsSelectable |
+                                       QtCore.Qt.ItemFlag.ItemIsEditable)  # noinspection
+                    self.city_table.setItem(row_idx, 0, name_item)
+                    # Видимые данные
+                    other_data = [f"{city['lat']:.6f}", f"{city['lon']:.6f}", city['timezone'], city['local_time'],
+                                  city['difference'], str(city['osm_id']), city['osm_type']]
 
-                    self.city_table.setItem(row_idx, i, item)
+                    for i, value in enumerate(other_data, start=1):
+                        item = QtWidgets.QTableWidgetItem(value)
 
-            self.city_table.blockSignals(False)
-        if self.city_table.rowCount() > 0:
-            # Выделяем первую строку программно
-            self.city_table.selectRow(0)
-        self.edit_delete_button_state()
-        self.apply_search_logic()
+                        # Условие для первых двух колонок (так как start=1, это i=1 и i=2)
+                        if i <= 2:
+                            item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignRight |
+                                                  QtCore.Qt.AlignmentFlag.AlignVCenter)
+
+                        # Ваши флаги
+                        # noinspection PyTypeChecker
+                        item.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled |
+                                      QtCore.Qt.ItemFlag.ItemIsSelectable)
+
+                        self.city_table.setItem(row_idx, i, item)
+
+                self.city_table.blockSignals(False)
+            if self.city_table.rowCount() > 0:
+                # Выделяем первую строку программно
+                self.city_table.selectRow(0)
+            self.edit_delete_button_state()
+            self.apply_search_logic()
 
     def edit_delete_button_state(self):
         # Блокируем, если строк 0, разблокируем, если > 0
@@ -994,15 +981,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
     def closeEvent(self, event):
         # Ваше действие при закрытии окна
         # После отладки удалить!!!
-        if not TST:
-            if self.save_geometry != self.saveGeometry():
-                self.settings.setValue(self.window_section + "/geometry",
-                                       self.saveGeometry())  # Сохранение размера окна
-            # Если состояние окна изменилось, то сохраняем
-            if self.save_windowState != self.saveState():
-                self.settings.setValue(self.window_section + "/windowState",
-                                       self.saveState())  # Сохранение состояния окна
-            self.save_table_state()
+        if self.save_geometry != self.saveGeometry():
+            self.settings.setValue(self.window_section + "/geometry",
+                                   self.saveGeometry())  # Сохранение размера окна
+        # Если состояние окна изменилось, то сохраняем
+        if self.save_windowState != self.saveState():
+            self.settings.setValue(self.window_section + "/windowState",
+                                   self.saveState())  # Сохранение состояния окна
+        self.save_table_state()
         if hasattr(self, 'db_connect'):
             self.db_connect.close()
         if self.help_win is not None and not sip.isdeleted(self.help_win):
