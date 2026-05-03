@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'Web_help_QT6_ui.ui'
+# Form implementation generated from reading ui file 'Web_helpQt6_ui.ui'
 #
 # Created by: PyQt6 UI code generator 6.11.0
 #

@@ -1,28 +1,29 @@
 import sqlite3
-from zoneinfo import ZoneInfo
-from PyQt6 import QtCore, QtWidgets
-from PyQt6.QtGui import QRegularExpressionValidator
-from PyQt6.QtWidgets import QTableWidgetItem, QMessageBox, QAbstractItemView, QDialog
-from PyQt6.QtCore import QResource, QTranslator, QLibraryInfo, QSettings, QDateTime, QRegularExpression, QTimeZone
 import sys
+from zoneinfo import ZoneInfo
+from PyQt6 import QtCore, QtWidgets, sip
+from PyQt6.QtGui import QRegularExpressionValidator, QPalette, QColor
+from PyQt6.QtWidgets import QTableWidgetItem, QMessageBox, QAbstractItemView, QDialog, QApplication
+from PyQt6.QtCore import QResource, QTranslator, QLibraryInfo, QSettings, QDateTime, QRegularExpression, QTimeZone, \
+    QtMsgType
 from typing import Final
 from pathlib import Path
-from PyQt6 import sip
-from World_time import Ui_MainWindow
-from World_time_add_dialog import Ui_DialogAdd
-from Web_help_QT6 import HelpWindow
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
-from Qt6_palette import PaletteManager, APP_STYLE, dict_colors
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtGui import QPalette, QColor
 from datetime import datetime
+from World_time import Ui_MainWindow
+from World_time_add_dialog import Ui_DialogAdd
+from Qt6_palette import PaletteManager, APP_STYLE, dict_colors
+from Web_helpQt6 import HelpWindow
 
 city_regex = QRegularExpression(r"^(?=.*[a-zA-Zа-яА-ЯёЁ])[a-zA-Zа-яА-ЯёЁ0-9\s\.\-\,]+$")
 
 DB_NAME: Final[str] = 'world_cities.db'
 ORGANIZATION_NAME: Final[str] = "isva_company"  # Имя организации разработчика для сохранения параметров в реестре
 APPLICATION_NAME: Final[str] = "World_time_Application"  # Название приложения для сохранения параметров в реестре
+
+# После отладки удалить!!!
+TST = False
 
 # В месте, где вы инициализируете менеджер палитр или окно:
 error_palette_theme = {"Темная": {"Base": "#8B6A6A", "Text": "white"},
@@ -68,6 +69,34 @@ class MyPaletteManager(PaletteManager):
         return base_palette, text_palette
 
 
+# После отладки удалить!!!
+def qt_message_handler(mode, _context, message):
+    # mode: тип сообщения (QtDebugMsg, QtInfoMsg, QtWarningMsg, QtCriticalMsg, QtFatalMsg)
+    # context: содержит информацию о файле, строке, функции
+    # message: сам текст
+    match mode:
+        case QtMsgType.QtInfoMsg:
+            mode = 'INFO'
+        case QtMsgType.QtWarningMsg:
+            mode = 'WARNING'
+        case QtMsgType.QtCriticalMsg:
+            mode = 'CRITICAL'
+        case QtMsgType.QtFatalMsg:
+            mode = 'FATAL'
+        case _:
+            mode = 'DEBUG'
+    print(f"Тип сообщения: {mode}\nQt Сообщение: {message}", file=sys.stderr)
+    # Можно изменить, убрав лишнее, например так:
+    # print(f"{message}",file=sys.stderr)
+    # Для избежания предупреждений IDE, параметр 'mode' необходимо переименовать в '_' или '_mode'
+    # и убрать команду match->case
+
+
+# После отладки удалить!!!
+# Устанавливаем обработчик
+QtCore.qInstallMessageHandler(qt_message_handler)
+
+
 def register_resources():
     rcc_path = Path(__file__).parent / "World_time.rcc"
     rcc_path_str = str(rcc_path)
@@ -88,7 +117,6 @@ class AddDialog(QDialog, Ui_DialogAdd):
         self.window_section = "Add_Window"  # Секция параметров окна
         # Получаем геометрию, сразу указывая тип возвращаемого значения (QByteArray)
         self.save_geometry = self.settings.value(self.window_section + "/geometry")
-        self.save_windowState = self.settings.value(self.window_section + "/windowState")
         self.find_cities_table_columns_count = 0
         self.find_cities_table_columns_count_restored = 0
         # Проверяем, что данные не None и восстанавливаем
@@ -315,11 +343,13 @@ class AddDialog(QDialog, Ui_DialogAdd):
 
     def closeEvent(self, event):
         # Ваше действие при закрытии окна
-        if self.save_geometry != self.saveGeometry():
-            self.settings.setValue(self.window_section + "/geometry",
-                                   self.saveGeometry())  # Сохранение размера окна
-        self.save_table_state()
-        # Если состояние окна изменилось, то сохраняем
+        # После отладки удалить!!!
+        if not TST:
+            if self.save_geometry != self.saveGeometry():
+                self.settings.setValue(self.window_section + "/geometry",
+                                       self.saveGeometry())  # Сохранение размера окна
+            self.save_table_state()
+            # Если состояние окна изменилось, то сохраняем
         self.accept()  # Это закроет диалог и отправит сигнал "готово"
         # event.accept()  # Закрываем основное окно
 
@@ -963,14 +993,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
 
     def closeEvent(self, event):
         # Ваше действие при закрытии окна
-        if self.save_geometry != self.saveGeometry():
-            self.settings.setValue(self.window_section + "/geometry",
-                                   self.saveGeometry())  # Сохранение размера окна
-        # Если состояние окна изменилось, то сохраняем
-        if self.save_windowState != self.saveState():
-            self.settings.setValue(self.window_section + "/windowState",
-                                   self.saveState())  # Сохранение состояния окна
-        self.save_table_state()
+        # После отладки удалить!!!
+        if not TST:
+            if self.save_geometry != self.saveGeometry():
+                self.settings.setValue(self.window_section + "/geometry",
+                                       self.saveGeometry())  # Сохранение размера окна
+            # Если состояние окна изменилось, то сохраняем
+            if self.save_windowState != self.saveState():
+                self.settings.setValue(self.window_section + "/windowState",
+                                       self.saveState())  # Сохранение состояния окна
+            self.save_table_state()
         if hasattr(self, 'db_connect'):
             self.db_connect.close()
         if self.help_win is not None and not sip.isdeleted(self.help_win):

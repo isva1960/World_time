@@ -3,8 +3,9 @@ from PyQt6 import QtWidgets, QtCore
 from PyQt6.QtCore import QSettings
 from PyQt6.QtCore import QUrl
 from PyQt6.QtWidgets import QVBoxLayout
-from Web_help_QT6_ui import Ui_Help_Window
+from Web_helpQt6_ui import Ui_Help_Window
 
+TST = True
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEnginePage
 from PyQt6.QtWidgets import QMenu
@@ -154,11 +155,12 @@ class HelpWindow(QtWidgets.QMainWindow, Ui_Help_Window):
     def closeEvent(self, event):
         # Ваше действие при закрытии окна
         # Если размер окна изменился, то сохраняем.
-        if self.save_geometry != self.saveGeometry():
-            self.settings.setValue(self.window_section + "/geometry",
-                                   self.saveGeometry())  # Сохранение размера окна
-        # Если состояние окна изменилось, то сохраняем
-        if self.save_windowState != self.saveState():
-            self.settings.setValue(self.window_section + "/windowState",
-                                   self.saveState())  # Сохранение состояния окна
+        if not TST:
+            if self.save_geometry != self.saveGeometry():
+                self.settings.setValue(self.window_section + "/geometry",
+                                       self.saveGeometry())  # Сохранение размера окна
+            # Если состояние окна изменилось, то сохраняем
+            if self.save_windowState != self.saveState():
+                self.settings.setValue(self.window_section + "/windowState",
+                                       self.saveState())  # Сохранение состояния окна
         event.accept()  # Закрываем окно

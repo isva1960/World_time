@@ -490,6 +490,7 @@ dict_colors = {"Темная": {
     }
 }
 
+
 class PaletteManager:
     def __init__(self, main_window, p_app, p_dict_colors, palette_combo):
         self.main_window = main_window
@@ -542,7 +543,6 @@ class PaletteManager:
             self.palette_combo.addItem(role_name)
             self.add_theme(role_colors, role_colors)  # !!!!
         self.palette_combo.addItem("Системная")
-        # def get_palettes(self):  # !!!
         current_style_name = self.app.style().objectName()
         styles = QtWidgets.QStyleFactory.keys()
         for style_name in styles:

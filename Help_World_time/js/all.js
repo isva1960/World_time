@@ -1184,8 +1184,8 @@ InputSync.prototype ={
 DR_EXPLAIN.namespace( 'DR_EXPLAIN.data_menu' );
 DR_EXPLAIN.data_menu = {
     // menu
-    DREX_NODE_NAMES: ["Начальная страница","Окно помощи","Начало работы","Расчет времени ","Добавление населенного пункта","Удаление населенного пункта","Изменение названия населенного пункта","Изменение населенного пункта для расчета","Изменение даты и времени","Поиск и фильтр","Изменение сортировки","Изменение палитры цветов","Скрытие и показ столбцов таблицы","Изменение позиции окон и ширины столбцов таблиц "],
-    DREX_NODE_LINKS: ["index.html","help_window.html","getting_started.html","timing.html","addition.html","removal.html","name_change.html","change_calculation.html","changing_the_date_and_time.html","search_and_filter.html","sorting.html","color_palettes.html","hiding_and_showing_columns.html","window_positions_and_column_widths.html"],
+    DREX_NODE_NAMES: ["Начальная страница","Окно помощи","Начало работы","Добавление населенного пункта","Удаление населенного пункта","Изменение населенного пункта для расчета","Изменение даты и времени","Расчет времени ","Изменение названия населенного пункта","Поиск и фильтр","Изменение сортировки","Изменение палитры цветов","Скрытие и показ столбцов таблицы","Изменение позиции окон и ширины столбцов таблиц "],
+    DREX_NODE_LINKS: ["index.html","help_window.html","getting_started.html","addition.html","removal.html","change_calculation.html","changing_the_date_and_time.html","timing.html","name_change.html","search_and_filter.html","sorting.html","color_palettes.html","hiding_and_showing_columns.html","window_positions_and_column_widths.html"],
     DREX_NODE_CHILD_START: [1,14,14,14,14,14,14,14,14,14,14,14,14,14],
     DREX_NODE_CHILD_END: [14,14,14,14,14,14,14,14,14,14,14,14,14,14],
     DREX_MENU_TYPE: 2,
