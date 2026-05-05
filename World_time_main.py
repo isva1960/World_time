@@ -22,7 +22,6 @@ ORGANIZATION_NAME: Final[str] = "isva_company"  # Имя организации 
 APPLICATION_NAME: Final[str] = "World_time_Application"  # Название приложения для сохранения параметров в реестре
 
 # После отладки удалить!!!
-
 # В месте, где вы инициализируете менеджер палитр или окно:
 error_palette_theme = {"Темная": {"Base": "#8B6A6A", "Text": "white"},
                        "Светлая": {"Base": "#FF9293", "Text": "#FFFFFF"},
@@ -65,7 +64,6 @@ class MyPaletteManager(PaletteManager):
         base_palette = palette.get("Base", self.error_palette["standard"]["Base"])
         text_palette = palette.get("Text", self.error_palette["standard"]["Text"])
         return base_palette, text_palette
-
 
 
 def register_resources():
@@ -117,10 +115,10 @@ class AddDialog(QDialog, Ui_DialogAdd):
         self.find_city_operation = False
 
     def showEvent(self, event: QShowEvent):
-        # Вызываем родительский метод, чтобы обеспечить правильную работу Qt
         self.city_edit.setText("")
         self.region_edit.setText("")
         self.find_cities_table.setRowCount(0)
+        # Вызываем родительский метод, чтобы обеспечить правильную работу Qt
         super().showEvent(event)
 
     def restore_table_state(self):
@@ -369,7 +367,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
         # Регистрируем функцию в SQLite, чтобы она была доступна в SQL-запросах
         self.db_connect.create_function("GET_TZ_OFFSET", 2, self.sql_get_offset)
         self.init_db()
-        # self.on_now()
         self.get_cities_for_combo()
         self.update_city_combos()
         # В __init__ вашего окна:
@@ -385,10 +382,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
         self.latitude_check.clicked.connect(self.on_latitude)
         self.longitude_check.clicked.connect(self.on_longitude)
         self.timezone_check.clicked.connect(self.on_timezone)
-        self.columnvisibility_button.clicked.connect(self.on_save_columnvisibility)
+        self.columnvisibility_button.clicked.connect(self.on_save_column_visibility)
         self.set_default_sorted()
         self.city_combo.currentTextChanged.connect(self.on_now)
-        # self.sort_combo.currentTextChanged.connect(self.on_now)
         self.sort_combo.currentTextChanged.connect(self.refresh_main_table)
         self.default_sity_button.clicked.connect(self.set_default_city)
         self.old_city_full = ""
@@ -402,7 +398,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
         self.city_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.city_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.city_table.itemDoubleClicked.connect(self.store_old_value)
-        # self.city_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Stretch)
 
         self.city_table.hideColumn(6)
         self.city_table.hideColumn(7)
@@ -658,7 +653,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
     def on_save_palette(self):
         self.settings.setValue(self.values_section + "/palette", self.palette_combo.currentText())
 
-    def on_save_columnvisibility(self):
+    def on_save_column_visibility(self):
         if self.latitude_state != self.latitude_check.isChecked():
             self.latitude_state = self.latitude_check.isChecked()
             self.settings.setValue(self.window_section + "/latitude_enabled", self.latitude_state)
@@ -673,7 +668,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
         self.save_rowcount = self.city_table.rowCount()
         if self.dialog is None:
             self.dialog = AddDialog(self)
-            # !!!!!
             # Обновления после закрытия диалога
             self.dialog.finished.connect(self.update_city_combos)
             self.dialog.finished.connect(self.refresh_main_table)
@@ -685,7 +679,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
         self.dialog.show()
 
     def refresh_rowcount(self):
-        if self.save_rowcount != self.city_table.rowCount():
+        if self.save_rowcount == 0 and self.city_table.rowCount() > 0:
             self.on_now()
 
     def set_default_sorted(self):
@@ -962,6 +956,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):  # Создаем сво
                     self.calculation_datetime.setDateTime(current_time_in_tz)
 
                     # print(f"Установлен пояс: {source_tz_str}, Время: {current_time_in_tz.toString()}")
+        else:
+            self.calculation_datetime.setDateTime(QDateTime.currentDateTime())
 
     def init_db(self):
         cursor = self.db_connect.cursor()
